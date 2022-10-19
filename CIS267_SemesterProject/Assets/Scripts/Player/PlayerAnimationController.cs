@@ -6,11 +6,19 @@ public class PlayerAnimationController : MonoBehaviour
 {
     private Animator playerAnimator;
     private string walkingBoolName = "isWalkingAnimatorBool";
+    private string flyingBoolName = "isFlyingAnimatorBool";
 
+
+
+
+    private void Awake()
+    {
+        playerAnimator = GetComponent<Animator>();
+    }
     // Start is called before the first frame update
     void Start()
     {
-        playerAnimator = GetComponent<Animator>();
+        
     }
 
     // Update is called once per frame
@@ -21,10 +29,21 @@ public class PlayerAnimationController : MonoBehaviour
 
     void setAnimation()
     {
-        Debug.Log(PlayerInfo.getIsWalking());
-        if (PlayerInfo.getIsWalking())
+        //Debug.Log(PlayerInfo.getIsWalking());
+        if (PlayerInfo.getIsWalking() && PlayerInfo.getIsGrounded())
         {
             playerAnimator.SetBool(walkingBoolName, true);
+            playerAnimator.SetBool(flyingBoolName, false);
+        }
+        else if (PlayerInfo.getIsFlying())
+        {
+            playerAnimator.SetBool(flyingBoolName, true);
+            playerAnimator.SetBool(walkingBoolName, false);
+        }
+        else
+        {
+            playerAnimator.SetBool(flyingBoolName, false);
+            playerAnimator.SetBool(walkingBoolName, false);
         }
     }
 }

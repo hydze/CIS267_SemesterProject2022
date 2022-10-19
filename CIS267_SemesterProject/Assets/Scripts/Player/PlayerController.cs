@@ -9,8 +9,10 @@ public class PlayerController : MonoBehaviour
     public float jetPackForce;
     private float inputHorizontal;
 
-    // Start is called before the first frame update
-    void Start()
+    //Called only once during the lifetime of the script
+    //Called after all objects are initialized
+    //Used to initialize variables
+    private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
 
@@ -18,20 +20,33 @@ public class PlayerController : MonoBehaviour
         PlayerInfo.setJetPackForce(jetPackForce);
     }
 
-    // Update is called once per frame
-    void Update()
+    // Start is called before the first frame update
+    void Start()
+    {
+
+    }
+
+    //FixedUpdate is called at a fixed interval independant of frame rate
+    //Used to handle any physics in the game
+    void FixedUpdate()
     {
         movePlayer();
         jetPack();
     }
 
-    void movePlayer()
+    // Update is called once per frame
+    //animations and user inpupt
+    void Update()
+    {
+        inputController();
+        flipPlayerSprite();
+    }
+
+    void inputController()
     {
         inputHorizontal = Input.GetAxisRaw("Horizontal");
 
-        rb.velocity = new Vector2(PlayerInfo.getWalkSpeed() * inputHorizontal, rb.velocity.y);
-
-        if(inputHorizontal != 0)
+        if (inputHorizontal != 0)
         {
             PlayerInfo.setIsWalking(true);
         }
@@ -40,7 +55,22 @@ public class PlayerController : MonoBehaviour
             PlayerInfo.setIsWalking(false);
         }
 
-        flipPlayerSprite();
+        if(Input.GetKey(KeyCode.Space))
+        {
+            PlayerInfo.setIsFlying(true);
+        }
+        else if (Input.GetKeyUp(KeyCode.Space))
+        {
+            PlayerInfo.setIsFlying(false);
+        }
+    }
+
+    void movePlayer()
+    {
+        if(PlayerInfo.getIsFlying() || PlayerInfo.getIsGrounded())
+        {
+            rb.velocity = new Vector2(PlayerInfo.getWalkSpeed() * inputHorizontal, rb.velocity.y);
+        }
     }
 
     void flipPlayerSprite()
@@ -61,6 +91,30 @@ public class PlayerController : MonoBehaviour
         {
             rb.AddForce(Vector2.up * PlayerInfo.getJetPackForce(), ForceMode2D.Force);
             //rb.velocity = new Vector2(rb.velocity.x, PlayerInfo.getJetPackForce());
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Walkable"))
+        {
+            PlayerInfo.setIsGrounded(true);
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("Walkable"))
+        {
+            PlayerInfo.setIsGrounded(true);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("Walkable"))
+        {
+            PlayerInfo.setIsGrounded(false);
         }
     }
 }
